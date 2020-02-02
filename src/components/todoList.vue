@@ -2,7 +2,7 @@
     <div>
         <input type="text" class="todo-input" placeholder="What needs to be done" v-model="newTodo" @keyup.enter="addTodo">
         <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
-            <TodoItem v-for="(todo, index) in todosFiltered" :key="todo.id" class="todo-item" :index="index" :todo="todo" :checkAll="!anyRemaining"  @removeTodo="removeTodo" @finishedEdit="finishedEdit"/>
+            <TodoItem v-for="(todo, index) in todosFiltered" :key="todo.id" class="todo-item" :index="index" :todo="todo" :checkAll="!anyRemaining"/>
         </transition-group>
 
         <div class="extra-container">
@@ -29,6 +29,7 @@
 
 <script>
     import TodoItem from "./todo-item.vue";
+    import eventsBus from "../main";
     export default {
         name: 'todo-list',
         components: {TodoItem},
@@ -53,6 +54,10 @@
                     },
                 ]
             }
+        },
+        created(){
+            eventsBus.$on('removeTodo',(index)=>this.removeTodo(index));
+            eventsBus.$on('finishedEdit',(data)=>this.finishedEdit(data));
         },
         computed: {
             remaining() {
