@@ -5,14 +5,17 @@
             <div v-if="!editing" @dblclick="editTodo()" class="todo-item-label" :class="{ completed : completed }">{{ title }}</div>
             <input v-else class="todo-item-edit" type="text" v-model="title" @blur="doneEdit" @keyup.enter="doneEdit" @keyup.esc="cancelEdit" v-focus>
         </div>
-        <div class="remove-item" @click="removeTodo(index)">
-            &times;
+        <div>
+            <button @click="pluralize">Plural</button>
+            <span class="remove-item" @click="removeTodo(index)">
+          &times;
+        </span>
         </div>
     </div>
 </template>
 
 <script>
-    import eventsBus from '../main';
+    import eventBus from '../main.js';
     export default {
         name: 'todo-item',
         props:{
@@ -38,6 +41,12 @@
                 beforeEditCache: '',
             }
         },
+        created() {
+            eventBus.$on('pluralize', this.handlePluralize)
+        },
+        beforeDestroy() {
+            eventBus.$off('pluralize', this.handlePluralize)
+        },
         watch: {
             checkAll() {
                 // if (this.checkAll) {
@@ -57,7 +66,7 @@
         },
         methods:{
             removeTodo(index){
-                eventsBus.$emit('removeTodo',index);
+                eventBus.$emit('removeTodo',index);
             },
             editTodo() {
                 this.beforeEditCache = this.title;
@@ -68,7 +77,7 @@
                     this.title = this.beforeEditCache
                 }
                 this.editing = false;
-                eventsBus.$emit('finishedEdit',{
+                eventBus.$emit('finishedEdit',{
                     'index':this.index,
                     'todo': {
                         'id': this.id,
@@ -79,9 +88,24 @@
                 });
             },
             cancelEdit() {
-                this.title = this.beforeEditCache
-                this.editing = false
+                this.title = this.beforeEditCache;
+                this.editing = false;
             },
+            pluralize() {
+                eventBus.$emit('pluralize')
+            },
+            handlePluralize() {
+                this.title = this.title + 's';
+                eventBus.$emit('finishedEdit', {
+                    'index': this.index,
+                    'todo': {
+                        'id': this.id,
+                        'title': this.title,
+                        'completed': this.completed,
+                        'editing': this.editing,
+                    }
+                })
+            }
         }
     }
 </script>
