@@ -6,7 +6,7 @@
             <input v-else class="todo-item-edit" type="text" v-model="title" @blur="doneEdit" @keyup.enter="doneEdit" @keyup.esc="cancelEdit" v-focus>
         </div>
         <div>
-            <button @click="pluralize">Plural</button>
+            <button @click="handlePluralize">Plural</button>
             <span class="remove-item" @click="removeTodo(index)">
           &times;
         </span>
@@ -42,10 +42,10 @@
             }
         },
         created() {
-            eventBus.$on('pluralize', this.handlePluralize)
+            //eventBus.$on('pluralize', this.handlePluralize)
         },
         beforeDestroy() {
-            eventBus.$off('pluralize', this.handlePluralize)
+            //eventBus.$off('pluralize', this.handlePluralize)
         },
         watch: {
             checkAll() {
@@ -65,8 +65,9 @@
             }
         },
         methods:{
-            removeTodo(index){
-                eventBus.$emit('removeTodo',index);
+            removeTodo(){
+                const index =this.$store.state.todos.findIndex(item => item.id == this.id);
+                this.$store.state.todos.splice(index, 1);
             },
             editTodo() {
                 this.beforeEditCache = this.title;
@@ -77,6 +78,15 @@
                     this.title = this.beforeEditCache
                 }
                 this.editing = false;
+                const index =this.$store.state.todos.findIndex(item => item.id == this.id);
+                this.$store.state.todos.splice(index,1,
+                    {
+                        'id': this.id,
+                        'title': this.title,
+                        'completed': this.completed,
+                        'editing': this.editing
+                    });
+/*
                 eventBus.$emit('finishedEdit',{
                     'index':this.index,
                     'todo': {
@@ -86,6 +96,7 @@
                         'editing': this.editing
                     }
                 });
+*/
             },
             cancelEdit() {
                 this.title = this.beforeEditCache;
@@ -96,7 +107,15 @@
             },
             handlePluralize() {
                 this.title = this.title + 's';
-                eventBus.$emit('finishedEdit', {
+                const index =this.$store.state.todos.findIndex(item => item.id == this.id);
+                this.$store.state.todos.splice(index,1,
+                    {
+                        'id': this.id,
+                        'title': this.title,
+                        'completed': this.completed,
+                        'editing': this.editing
+                    });
+                /*eventBus.$emit('finishedEdit', {
                     'index': this.index,
                     'todo': {
                         'id': this.id,
@@ -104,7 +123,7 @@
                         'completed': this.completed,
                         'editing': this.editing,
                     }
-                })
+                })*/
             }
         }
     }
