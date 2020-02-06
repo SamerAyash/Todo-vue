@@ -2,13 +2,12 @@
     <div>
         <input type="text" class="todo-input" placeholder="What needs to be done" v-model="newTodo" @keyup.enter="addTodo">
         <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
-            <todo-item v-for="(todo, index) in todosFiltered" :key="todo.id" :todo="todo" :index="index" :checkAll="!anyRemaining">
+            <todo-item v-for="todo in todosFiltered" :key="todo.id" :todo="todo" :checkAll="!anyRemaining">
             </todo-item>
         </transition-group>
-
         <div class="extra-container">
             <todo-check-all :anyRemaining="anyRemaining"></todo-check-all>
-            <todo-items-remaining :remaining="remaining"></todo-items-remaining>
+            <todo-items-remaining></todo-items-remaining>
         </div>
 
         <div class="extra-container">
@@ -16,7 +15,8 @@
 
             <div>
                 <transition name="fade">
-                    <todo-clear-completed :showClearCompletedButton="showClearCompletedButton"></todo-clear-completed>                </transition>
+                    <todo-clear-completed ></todo-clear-completed>
+                </transition>
             </div>
 
         </div>
@@ -25,7 +25,6 @@
 
 <script>
     import TodoItem from "./todo-item.vue"
-    import eventBus from "../main"
     import TodoItemsRemaining from './TodoItemsRemaining'
     import TodoCheckAll from './TodoCheckAll'
     import TodoFiltered from './TodoFiltered'
@@ -41,8 +40,10 @@
         data () {
             return {
                 newTodo: '',
-                idForTodo: 3,
             }
+        },
+        created() {
+            this.$store.dispatch('retrieveTodos')
         },
         computed: {
             anyRemaining() {
@@ -65,12 +66,12 @@
                     return
                 }
                 this.$store.dispatch('addTodo',{
-                    id: this.idForTodo,
                     title: this.newTodo,
+                    completed:false,
                 });
 
-                this.newTodo = ''
-                this.idForTodo++
+                this.newTodo = '';
+                this.idForTodo++;
             },
         }
     }
